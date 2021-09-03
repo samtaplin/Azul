@@ -15,14 +15,22 @@ def decidemove(playerboard, oppboard, factories, floor, game, midtake):
         chind = len(factories)
         chfact = floor
     else:
-        chind = int(chfact) - 1
-        chfact = factories[int(chfact) - 1]
+        try:
+            chind = int(chfact) - 1
+            chfact = factories[int(chfact) - 1]
+        except ValueError:
+            print("Cannot perform illegal move")
+            return decidemove(playerboard, oppboard, factories, floor, game, midtake)
     chcolor = int(chcolor)
     if buck != "N":
-        buck = int(buck) - 1
-        if decision.isLegal(chind, chcolor, buck, game, playerboard):
-            return chfact, chcolor, playerboard.buckets[buck]
-        else:
+        try:
+            buck = int(buck) - 1
+            if decision.isLegal(chind, chcolor, buck, game, playerboard):
+                return chfact, chcolor, playerboard.buckets[buck]
+            else:
+                print("Cannot perform illegal move")
+                return decidemove(playerboard, oppboard, factories, floor, game, midtake)
+        except KeyError:
             print("Cannot perform illegal move")
             return decidemove(playerboard, oppboard, factories, floor, game, midtake)
     else:
@@ -113,7 +121,7 @@ class Game:
         if self.board0.isendstate() or self.board1.isendstate():
             self.board0.bonuspoints()
             self.board1.bonuspoints()
-            print("Final Score: Player1-", self.board0.points, "Player2-", self.board1.points)
+            print("Final Score: Player0-", self.board0.points, "Player1-", self.board1.points)
             return True
         else:
             return False
@@ -172,6 +180,9 @@ class Game:
             if copy.board0.isendstate() or copy.board1.isendstate():
                 copy.board0.bonuspoints()
                 copy.board1.bonuspoints()
+            else:
+                for fact in copy.factories:
+                    fact.fill(copy.bag.drawfour())
             return copy, copy.goesfirst, copy.other2(copy.goesfirst), False
         return copy, copy.other2(cplayer), cplayer, midtake
         
@@ -210,6 +221,7 @@ class Factory:
         if self.isempty():
             return "|||X|||"
         else:
+            self.tiles.sort(key=lambda t: t.color)
             return "<" + str([str(tile) for tile in self.tiles]) + ">"
     
     def createcopy(self):
@@ -376,6 +388,7 @@ class Tile:
         return '|' + str(self.color) + "|"
     def createcopy(self):
         return Tile(self.color)
+    
 class BoardTile(Tile):
     def __init__(self, color, filled=False):
         self.color = color

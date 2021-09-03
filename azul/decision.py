@@ -16,7 +16,8 @@ def LegalMoves(game, playerboard):
             for buind in range(game.size):
                 if isLegal(faind, co, buind, game, playerboard):
                     yield (faind, co, buind)
-            yield (faind, co, "N")
+            if isLegal(faind, co, "N", game, playerboard):
+                yield (faind, co, "N")
 def move(factory, color, bucket):
     return (factory, color, bucket)
     
@@ -28,7 +29,7 @@ def aimove(playerboard, oppboard, factories, floor, game, midtake=False, depth=3
     for move in LegalMoves(game, playerboard):
         successor, nextpb, noppb, nmidtake = game.generatesuccessor(move, playerboard, midtake)
         v = value(successor, nextpb, noppb, nmidtake, depth, a, b)
-        if v > mv:
+        if v >= mv:
             mv = v
             m = move
         a = max(a, v)
